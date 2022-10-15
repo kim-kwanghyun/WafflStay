@@ -1,7 +1,9 @@
+// Sources flattened with hardhat v2.11.2 https://hardhat.org
+// File @openzeppelin/contracts/utils/Context.sol@v4.7.3
 // SPDX-License-Identifier: MIT
-// OpenZeppelin Contracts (last updated v4.7.0) (token/ERC20/ERC20.sol)
+// OpenZeppelin Contracts v4.4.1 (utils/Context.sol)
 
-pragma solidity ^0.8.4;
+pragma solidity ^0.8.0;
 
 abstract contract Context {
     function _msgSender() internal view virtual returns (address) {
@@ -13,67 +15,169 @@ abstract contract Context {
     }
 }
 
+
+// File @openzeppelin/contracts/access/Ownable.sol@v4.7.3
+
+// OpenZeppelin Contracts (last updated v4.7.0) (access/Ownable.sol)
+
+pragma solidity ^0.8.0;
+
+abstract contract Ownable is Context {
+    address private _owner;
+
+    event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
+
+    constructor() {
+        _transferOwnership(_msgSender());
+    }
+
+    modifier onlyOwner() {
+        _checkOwner();
+        _;
+    }
+
+    function owner() public view virtual returns (address) {
+        return _owner;
+    }
+
+    function _checkOwner() internal view virtual {
+        require(owner() == _msgSender(), "Ownable: caller is not the owner");
+    }
+
+    function renounceOwnership() public virtual onlyOwner {
+        _transferOwnership(address(0));
+    }
+
+    function transferOwnership(address newOwner) public virtual onlyOwner {
+        require(newOwner != address(0), "Ownable: new owner is the zero address");
+        _transferOwnership(newOwner);
+    }
+
+    function _transferOwnership(address newOwner) internal virtual {
+        address oldOwner = _owner;
+        _owner = newOwner;
+        emit OwnershipTransferred(oldOwner, newOwner);
+    }
+}
+
+
+// File @openzeppelin/contracts/token/ERC20/IERC20.sol@v4.7.3
+
+
+// OpenZeppelin Contracts (last updated v4.6.0) (token/ERC20/IERC20.sol)
+
+pragma solidity ^0.8.0;
+
 interface IERC20 {
     event Transfer(address indexed from, address indexed to, uint256 value);
+
     event Approval(address indexed owner, address indexed spender, uint256 value);
+
     function totalSupply() external view returns (uint256);
+
     function balanceOf(address account) external view returns (uint256);
+
     function transfer(address to, uint256 amount) external returns (bool);
 
     function allowance(address owner, address spender) external view returns (uint256);
 
     function approve(address spender, uint256 amount) external returns (bool);
+
     function transferFrom(
         address from,
         address to,
         uint256 amount
     ) external returns (bool);
 }
+
+
+// File @openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol@v4.7.3
+
+
+// OpenZeppelin Contracts v4.4.1 (token/ERC20/extensions/IERC20Metadata.sol)
+
+pragma solidity ^0.8.0;
+
 interface IERC20Metadata is IERC20 {
     function name() external view returns (string memory);
+
     function symbol() external view returns (string memory);
+
     function decimals() external view returns (uint8);
 }
+
+
+// File @openzeppelin/contracts/token/ERC20/ERC20.sol@v4.7.3
+
+
+// OpenZeppelin Contracts (last updated v4.7.0) (token/ERC20/ERC20.sol)
+
+pragma solidity ^0.8.0;
+
+
+
+
 contract ERC20 is Context, IERC20, IERC20Metadata {
     mapping(address => uint256) private _balances;
+
     mapping(address => mapping(address => uint256)) private _allowances;
+
     uint256 private _totalSupply;
+
     string private _name;
     string private _symbol;
 
+   
     constructor(string memory name_, string memory symbol_) {
         _name = name_;
         _symbol = symbol_;
     }
+
+   
     function name() public view virtual override returns (string memory) {
         return _name;
     }
+
+    
     function symbol() public view virtual override returns (string memory) {
         return _symbol;
     }
+
+  
     function decimals() public view virtual override returns (uint8) {
         return 18;
     }
+
+  
     function totalSupply() public view virtual override returns (uint256) {
         return _totalSupply;
     }
+
+  
     function balanceOf(address account) public view virtual override returns (uint256) {
         return _balances[account];
     }
+
+   
     function transfer(address to, uint256 amount) public virtual override returns (bool) {
         address owner = _msgSender();
         _transfer(owner, to, amount);
         return true;
     }
+
+  
     function allowance(address owner, address spender) public view virtual override returns (uint256) {
         return _allowances[owner][spender];
     }
+
+   
     function approve(address spender, uint256 amount) public virtual override returns (bool) {
         address owner = _msgSender();
         _approve(owner, spender, amount);
         return true;
     }
 
+   
     function transferFrom(
         address from,
         address to,
@@ -85,11 +189,14 @@ contract ERC20 is Context, IERC20, IERC20Metadata {
         return true;
     }
 
+ 
     function increaseAllowance(address spender, uint256 addedValue) public virtual returns (bool) {
         address owner = _msgSender();
         _approve(owner, spender, allowance(owner, spender) + addedValue);
         return true;
     }
+
+  
     function decreaseAllowance(address spender, uint256 subtractedValue) public virtual returns (bool) {
         address owner = _msgSender();
         uint256 currentAllowance = allowance(owner, spender);
@@ -100,6 +207,8 @@ contract ERC20 is Context, IERC20, IERC20Metadata {
 
         return true;
     }
+
+  
     function _transfer(
         address from,
         address to,
@@ -114,40 +223,46 @@ contract ERC20 is Context, IERC20, IERC20Metadata {
         require(fromBalance >= amount, "ERC20: transfer amount exceeds balance");
         unchecked {
             _balances[from] = fromBalance - amount;
-            _balances[to] += amount;
         }
+        _balances[to] += amount;
+
         emit Transfer(from, to, amount);
+
         _afterTokenTransfer(from, to, amount);
     }
 
+   
     function _mint(address account, uint256 amount) internal virtual {
         require(account != address(0), "ERC20: mint to the zero address");
 
         _beforeTokenTransfer(address(0), account, amount);
 
         _totalSupply += amount;
-        unchecked {
-            // Overflow not possible: balance + amount is at most totalSupply + amount, which is checked above.
-            _balances[account] += amount;
-        }
+        _balances[account] += amount;
         emit Transfer(address(0), account, amount);
+
         _afterTokenTransfer(address(0), account, amount);
     }
 
+  
     function _burn(address account, uint256 amount) internal virtual {
         require(account != address(0), "ERC20: burn from the zero address");
+
         _beforeTokenTransfer(account, address(0), amount);
 
         uint256 accountBalance = _balances[account];
         require(accountBalance >= amount, "ERC20: burn amount exceeds balance");
         unchecked {
             _balances[account] = accountBalance - amount;
-            // Overflow not possible: amount <= accountBalance <= totalSupply.
-            _totalSupply -= amount;
         }
+        _totalSupply -= amount;
+
         emit Transfer(account, address(0), amount);
+
         _afterTokenTransfer(account, address(0), amount);
     }
+
+  
     function _approve(
         address owner,
         address spender,
@@ -160,6 +275,7 @@ contract ERC20 is Context, IERC20, IERC20Metadata {
         emit Approval(owner, spender, amount);
     }
 
+   
     function _spendAllowance(
         address owner,
         address spender,
@@ -174,12 +290,14 @@ contract ERC20 is Context, IERC20, IERC20Metadata {
         }
     }
 
+ 
     function _beforeTokenTransfer(
         address from,
         address to,
         uint256 amount
     ) internal virtual {}
 
+  
     function _afterTokenTransfer(
         address from,
         address to,
@@ -187,9 +305,36 @@ contract ERC20 is Context, IERC20, IERC20Metadata {
     ) internal virtual {}
 }
 
-contract WaffleStay is ERC20 {
-    constructor() ERC20("WaffleStay", "WAF") {        
-        _mint(msg.sender, 1000000000000000000000000000);
-        
+
+// File contracts/waffleStay/WaffleStayERC20.sol
+
+pragma solidity ^0.8.0;
+
+
+contract WaffleStayERC20 is ERC20, Ownable {
+
+    mapping(address => bool) public frozenAccount;
+
+    constructor(string memory _name, string memory _symbol) public ERC20(_name, _symbol) {
+        super._mint(msg.sender, 100000000000000000000000000);
     }
+
+    function freezeAccount(address account) external onlyOwner {
+        frozenAccount[account] = true;
+    }
+
+    function unFreezeAccount(address account) external onlyOwner {
+        frozenAccount[account] = false;
+    }
+
+    function _beforeTokenTransfer(
+        address from,
+        address to,
+        uint256 value
+    ) internal virtual override {
+        require(!frozenAccount[from], "From Frozen");
+        require(!frozenAccount[to], "To Frozen");
+        super._beforeTokenTransfer(from, to, value);
+    }
+
 }
