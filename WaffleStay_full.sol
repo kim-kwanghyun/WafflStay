@@ -1,8 +1,11 @@
+// Sources flattened with hardhat v2.11.2 https://hardhat.org
+
+// File @openzeppelin/contracts/utils/Context.sol@v4.7.3
+
 // SPDX-License-Identifier: MIT
-// OpenZeppelin Contracts (last updated v4.7.0) (token/ERC20/ERC20.sol)
+// OpenZeppelin Contracts v4.4.1 (utils/Context.sol)
 
-pragma solidity ^0.8.4;
-
+pragma solidity ^0.8.0;
 
 /**
  * @dev Provides information about the current execution context, including the
@@ -24,6 +27,97 @@ abstract contract Context {
     }
 }
 
+
+// File @openzeppelin/contracts/access/Ownable.sol@v4.7.3
+
+// OpenZeppelin Contracts (last updated v4.7.0) (access/Ownable.sol)
+
+pragma solidity ^0.8.0;
+
+/**
+ * @dev Contract module which provides a basic access control mechanism, where
+ * there is an account (an owner) that can be granted exclusive access to
+ * specific functions.
+ *
+ * By default, the owner account will be the one that deploys the contract. This
+ * can later be changed with {transferOwnership}.
+ *
+ * This module is used through inheritance. It will make available the modifier
+ * `onlyOwner`, which can be applied to your functions to restrict their use to
+ * the owner.
+ */
+abstract contract Ownable is Context {
+    address private _owner;
+
+    event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
+
+    /**
+     * @dev Initializes the contract setting the deployer as the initial owner.
+     */
+    constructor() {
+        _transferOwnership(_msgSender());
+    }
+
+    /**
+     * @dev Throws if called by any account other than the owner.
+     */
+    modifier onlyOwner() {
+        _checkOwner();
+        _;
+    }
+
+    /**
+     * @dev Returns the address of the current owner.
+     */
+    function owner() public view virtual returns (address) {
+        return _owner;
+    }
+
+    /**
+     * @dev Throws if the sender is not the owner.
+     */
+    function _checkOwner() internal view virtual {
+        require(owner() == _msgSender(), "Ownable: caller is not the owner");
+    }
+
+    /**
+     * @dev Leaves the contract without owner. It will not be possible to call
+     * `onlyOwner` functions anymore. Can only be called by the current owner.
+     *
+     * NOTE: Renouncing ownership will leave the contract without an owner,
+     * thereby removing any functionality that is only available to the owner.
+     */
+    function renounceOwnership() public virtual onlyOwner {
+        _transferOwnership(address(0));
+    }
+
+    /**
+     * @dev Transfers ownership of the contract to a new account (`newOwner`).
+     * Can only be called by the current owner.
+     */
+    function transferOwnership(address newOwner) public virtual onlyOwner {
+        require(newOwner != address(0), "Ownable: new owner is the zero address");
+        _transferOwnership(newOwner);
+    }
+
+    /**
+     * @dev Transfers ownership of the contract to a new account (`newOwner`).
+     * Internal function without access restriction.
+     */
+    function _transferOwnership(address newOwner) internal virtual {
+        address oldOwner = _owner;
+        _owner = newOwner;
+        emit OwnershipTransferred(oldOwner, newOwner);
+    }
+}
+
+
+// File @openzeppelin/contracts/token/ERC20/IERC20.sol@v4.7.3
+
+
+// OpenZeppelin Contracts (last updated v4.6.0) (token/ERC20/IERC20.sol)
+
+pragma solidity ^0.8.0;
 
 /**
  * @dev Interface of the ERC20 standard as defined in the EIP.
@@ -102,6 +196,15 @@ interface IERC20 {
         uint256 amount
     ) external returns (bool);
 }
+
+
+// File @openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol@v4.7.3
+
+
+// OpenZeppelin Contracts v4.4.1 (token/ERC20/extensions/IERC20Metadata.sol)
+
+pragma solidity ^0.8.0;
+
 /**
  * @dev Interface for the optional metadata functions from the ERC20 standard.
  *
@@ -124,6 +227,16 @@ interface IERC20Metadata is IERC20 {
     function decimals() external view returns (uint8);
 }
 
+
+// File @openzeppelin/contracts/token/ERC20/ERC20.sol@v4.7.3
+
+
+// OpenZeppelin Contracts (last updated v4.7.0) (token/ERC20/ERC20.sol)
+
+pragma solidity ^0.8.0;
+
+
+
 /**
  * @dev Implementation of the {IERC20} interface.
  *
@@ -132,7 +245,7 @@ interface IERC20Metadata is IERC20 {
  * For a generic mechanism see {ERC20PresetMinterPauser}.
  *
  * TIP: For a detailed writeup see our guide
- * https://forum.openzeppelin.com/t/how-to-implement-erc20-supply-mechanisms/226[How
+ * https://forum.zeppelin.solutions/t/how-to-implement-erc20-supply-mechanisms/226[How
  * to implement supply mechanisms].
  *
  * We have followed general OpenZeppelin Contracts guidelines: functions revert
@@ -354,10 +467,8 @@ contract ERC20 is Context, IERC20, IERC20Metadata {
         require(fromBalance >= amount, "ERC20: transfer amount exceeds balance");
         unchecked {
             _balances[from] = fromBalance - amount;
-            // Overflow not possible: the sum of all balances is capped by totalSupply, and the sum is preserved by
-            // decrementing then incrementing.
-            _balances[to] += amount;
         }
+        _balances[to] += amount;
 
         emit Transfer(from, to, amount);
 
@@ -379,10 +490,7 @@ contract ERC20 is Context, IERC20, IERC20Metadata {
         _beforeTokenTransfer(address(0), account, amount);
 
         _totalSupply += amount;
-        unchecked {
-            // Overflow not possible: balance + amount is at most totalSupply + amount, which is checked above.
-            _balances[account] += amount;
-        }
+        _balances[account] += amount;
         emit Transfer(address(0), account, amount);
 
         _afterTokenTransfer(address(0), account, amount);
@@ -408,9 +516,8 @@ contract ERC20 is Context, IERC20, IERC20Metadata {
         require(accountBalance >= amount, "ERC20: burn amount exceeds balance");
         unchecked {
             _balances[account] = accountBalance - amount;
-            // Overflow not possible: amount <= accountBalance <= totalSupply.
-            _totalSupply -= amount;
         }
+        _totalSupply -= amount;
 
         emit Transfer(account, address(0), amount);
 
@@ -505,10 +612,36 @@ contract ERC20 is Context, IERC20, IERC20Metadata {
     ) internal virtual {}
 }
 
-/// @custom:security-contact khkim@swave.kr
-contract WaffleStay is ERC20 {
-    constructor() ERC20("WaffleStay", "WAF") {        
-        _mint(msg.sender, 1000000000000000000000000000);
-        
+
+// File contracts/waffleStay/WaffleStayERC20.sol
+
+pragma solidity ^0.8.0;
+
+
+contract WaffleStayERC20 is ERC20, Ownable {
+
+    mapping(address => bool) public frozenAccount;
+
+    constructor(string memory _name, string memory _symbol) public ERC20(_name, _symbol) {
+        super._mint(msg.sender, 100000000000000000000000000);
     }
+
+    function freezeAccount(address account) external onlyOwner {
+        frozenAccount[account] = true;
+    }
+
+    function unFreezeAccount(address account) external onlyOwner {
+        frozenAccount[account] = false;
+    }
+
+    function _beforeTokenTransfer(
+        address from,
+        address to,
+        uint256 value
+    ) internal virtual override {
+        require(!frozenAccount[from], "From Frozen");
+        require(!frozenAccount[to], "To Frozen");
+        super._beforeTokenTransfer(from, to, value);
+    }
+
 }
